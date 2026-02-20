@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrashCanAP // PREVIEW</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
+        body { 
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
+            color: white; 
+            font-family: 'Outfit', sans-serif; 
+            min-height: 100vh;
+            margin: 0;
+        }
+        .neon-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .progress-glow {
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-md mx-auto space-y-8">
+        <header class="text-center space-y-2">
+            <h1 class="text-4xl font-bold tracking-tight">SmartBin <span class="gradient-text">Vivid</span></h1>
+            <p class="text-blue-200 text-sm opacity-80 uppercase tracking-widest">Interface Preview // 10.0.0.1</p>
+        </header>
+
+        <!-- Distance Tracker -->
+        <div class="neon-card p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4">
+                <div id="signal" class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
+            </div>
+            <h2 class="text-blue-200 text-xs uppercase tracking-widest font-bold mb-2">Distance Reading</h2>
+            <div class="flex items-center justify-center space-x-2">
+                <span id="distance" class="text-7xl font-bold tracking-tighter">24</span>
+                <span class="text-2xl font-light text-blue-300">cm</span>
+            </div>
+            <div class="mt-6 h-4 w-full bg-white/10 rounded-full overflow-hidden">
+                <div id="dist-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500 progress-glow" style="width: 24%"></div>
+            </div>
+        </div>
+
+        <!-- Lid Status -->
+        <div id="status-card" class="neon-card p-6 flex items-center justify-between transition-all duration-500">
+            <div>
+                <p class="text-xs text-blue-200 uppercase font-bold tracking-wider">Lid Status</p>
+                <h3 id="status-text" class="text-2xl font-bold">STANDBY</h3>
+            </div>
+            <div id="status-icon" class="p-4 rounded-2xl bg-white/10">
+                <svg id="icon-svg" class="w-8 h-8 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path id="svg-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Live Feed -->
+        <div class="neon-card p-6">
+            <h2 class="text-xs font-bold text-blue-200 mb-4 uppercase tracking-widest">System Events</h2>
+            <div id="log-container" class="space-y-3 h-40 overflow-y-auto pr-2 scrollbar-hide text-sm">
+                <!-- Initial Log -->
+                <div class="flex items-start space-x-3 text-blue-100/60">
+                    <span class="font-bold text-cyan-400">SYS</span>
+                    <p>Interface preview mode active</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Controls (Preview Only) -->
+        <div class="text-center">
+            <p class="text-[10px] text-blue-300/50 mb-2 font-bold uppercase tracking-widest">Preview Simulation</p>
+            <input type="range" min="0" max="100" value="24" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-400" oninput="simulateData(this.value)">
+        </div>
+    </div>
+
+    <script>
+        function addLog(msg, type = "INF") {
+            const container = document.getElementById('log-container');
+            const entry = document.createElement('div');
+            entry.className = "flex items-start space-x-3 animate-fade-in";
+            const colors = { "INF": "text-cyan-400", "ACT": "text-pink-400", "WRN": "text-yellow-400" };
+            entry.innerHTML = `<span class="font-bold ${colors[type] || 'text-white'}">${type}</span><p>${msg}</p>`;
+            container.prepend(entry);
+        }
+
+        function simulateData(val) {
+            const distance = parseInt(val);
+            document.getElementById('distance').innerText = distance;
+            document.getElementById('dist-bar').style.width = distance + '%';
+            
+            const statusText = document.getElementById('status-text');
+            const card = document.getElementById('status-card');
+            const path = document.getElementById('svg-path');
+            
+            if (distance < 20) {
+                if (statusText.innerText !== "ACTIVE / OPEN") {
+                    addLog("Motion detected - Opening Lid", "ACT");
+                    card.style.background = "rgba(236, 72, 153, 0.2)";
+                    card.style.borderColor = "rgba(236, 72, 153, 0.4)";
+                    path.setAttribute("d", "M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z");
+                }
+                statusText.innerText = "ACTIVE / OPEN";
+            } else {
+                if (statusText.innerText !== "STANDBY / CLOSED") {
+                    addLog("Area cleared - Closing Lid", "INF");
+                    card.style.background = "rgba(255, 255, 255, 0.1)";
+                    card.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                    path.setAttribute("d", "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z");
+                }
+                statusText.innerText = "STANDBY / CLOSED";
+            }
+        }
+    </script>
+</body>
+</html>
