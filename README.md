@@ -12,3 +12,8 @@ Components Needed
     Power Source (5V via USB-C or a 3.7V Li-ion battery)
 
     Jumper Wires and a small breadboard (or soldering iron)
+
+
+
+
+LIBRARIS NEEDED: ESP32Servo, ESPAsyncWebServer, and AsyncTCP
